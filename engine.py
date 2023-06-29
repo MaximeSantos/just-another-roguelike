@@ -21,6 +21,10 @@ class Engine:
         self.player = player
         self.update_fov()  # the function is actually called when Engine is instantiated, before the player has even moved
 
+    def handle_enemy_turns(self) -> None:
+        for entity in self.game_map.entities - {self.player}:
+            print(f"The {entity.name} is growing impatient.")
+
     def handle_event(self, events: Iterable[Any]) -> None:
         for event in events:
             action = self.event_handler.dispatch(event)
@@ -29,7 +33,7 @@ class Engine:
                 continue
 
             action.perform(self, self.player)
-
+            self.handle_enemy_turns()
             self.update_fov()  # updates the FOV before the player's next action
 
     def update_fov(self) -> None:
