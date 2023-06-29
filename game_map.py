@@ -1,12 +1,20 @@
+from __future__ import annotations
+
+from typing import Iterable, TYPE_CHECKING
+
 import numpy as np
 from tcod.console import Console
 
 import tile_types
 
+if TYPE_CHECKING:
+    from entity import Entity
+
 
 class GameMap:
-    def __init__(self, width: int, height: int):
+    def __init__(self, width: int, height: int, entities: Iterable[Entity] = ()):
         self.width, self.height = width, height
+        self.entities = set(entities)
         # create 2D arrays, filled with the same values, walls by default, or False for our visible & explored tiles
         self.tiles = np.full((width, height), fill_value=tile_types.wall, order="F")
         self.visible = np.full((width, height), fill_value=False, order="F")
@@ -33,3 +41,7 @@ class GameMap:
             # if it passed neither, then it gets the default value in SHROUD
             default=tile_types.SHROUD,
         )
+        for entity in self.entities:
+            # only prints entity within the FOV
+            if self.visible[entity.x, entity.y]:
+                console.print(entity.x, entity.y, entity.char, fg=entity.color)
