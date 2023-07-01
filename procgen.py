@@ -8,7 +8,7 @@ from game_map import GameMap
 import tile_types
 
 if TYPE_CHECKING:
-    from entity import Entity
+    from engine import Engine
 
 import tcod
 
@@ -92,10 +92,11 @@ def generate_dungeon(
     map_width: int,
     map_height: int,
     max_monsters_per_room: int,
-    player: Entity,
+    engine: Engine,
 ) -> GameMap:
     """Generate a new dungeon map."""
-    dungeon = GameMap(map_width, map_height, entities=[player])
+    player = engine.player
+    dungeon = GameMap(engine, map_width, map_height, entities=[player])
 
     rooms: List[RectangularRoom] = []
 
@@ -113,14 +114,15 @@ def generate_dungeon(
 
         # run through the other rooms and see if they intersect with this one
         if any(new_room.intersects(other_room) for other_room in rooms):
-            continue  # todo for now, if it intersects, skips the rest of the loop
+            continue  # TODO for now, if it intersects, skips the rest of the loop
         # if there are no intersections then the room is valid
 
         dungeon.tiles[new_room.inner] = tile_types.floor
 
         if len(rooms) == 0:
             # player is placed in the first room
-            player.x, player.y = new_room.center
+            # TODO (*.....) ?
+            player.place(*new_room.center, dungeon)
         else:
             # for all other rooms, digs a tunnel between current & previous room
             for x, y in tunnel_between(rooms[-1].center, new_room.center):
