@@ -82,7 +82,21 @@ class GameMap:
             # if it passed neither, then it gets the default value in SHROUD
             default=tile_types.SHROUD,
         )
-        for entity in self.entities:
+
+        """
+        The sorted function takes two arguments: The collection to sort, and the function used to sort it. By using key in sorted, here we're using a lambda function
+        (basically, a function that's limited to one line that we don't need to write a formal definition for)
+        The lambda function itself tells sorted to sort by the value of render_order.
+        Since the RenderOrder enum defines its order from 1 (Corpse, lowest) to 3 (Actor, highest),
+        corpses should be sent to the front of the sorted list and drawn first. Then overriden by "higher ranked" entities.
+        """
+        entities_sorted_for_rendering = sorted(
+            self.entities, key=lambda x: x.render_order.value
+        )
+
+        for entity in entities_sorted_for_rendering:
             # only prints entity within the FOV
             if self.visible[entity.x, entity.y]:
-                console.print(entity.x, entity.y, entity.char, fg=entity.color)
+                console.print(
+                    x=entity.x, y=entity.y, string=entity.char, fg=entity.color
+                )
